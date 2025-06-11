@@ -1,75 +1,89 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query';
+import React from 'react';
+import { ActivityIndicator, FlatList, ScrollView, StyleSheet, Text, View } from 'react-native';
+import NavBare from '../../components/navBare';
+import ScrollViewVerticale from '../../components/ScrollViewVerticale';
+import ScrollViewVerticaleMenu from '../../components/ScrollViewVerticaleMenu';
 
-export default function HomeScreen() {
+// 1. Crée un client React Query
+const queryClient = new QueryClient();
+
+// 2. Fonction de récupération des utilisateurs (via fetch)
+const fetchUsers = async () => {
+const response = await fetch('http://localhost:8888/api_/user.php');
+
+  if (!response.ok) {
+    throw new Error('Erreur lors du chargement des utilisateurs');
+  }
+  return response.json(); // Attend un tableau d'objets JSON
+};
+
+// 3. Composant pour afficher les utilisateurs
+const UserList = () => {
+// const [loading, setLoading] = useState(false);
+  const { data, error, isLoading } = useQuery({
+    queryKey: ['users'],    // Clé de cache
+    queryFn: fetchUsers,    // Fonction de récupération
+  });
+  if (isLoading) {
+    return <ActivityIndicator size="large" />;
+  }
+
+  if (error) {
+    return <Text>Erreur : {error.message}</Text>;
+  }
+//const UserLists = (data[0].name);
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    <FlatList
+      data={data}
+      keyExtractor={(item) => item.id.toString()}
+      renderItem={({ item }) => (
+        <View style={{ padding: 10 }}>
+          <Text>{item.name} {item.prenom}</Text>
+        </View>
+      )}
+    />
   );
-}
+};
 
-const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+
+ const accueil = () => {
+  
+return(
+    <View style={styles.view}>
+      <NavBare />
+ <ScrollViewVerticaleMenu/>
+ < ScrollView style={styles.container}>
+      <ScrollViewVerticale />
+       <QueryClientProvider client={queryClient}>
+      <View style={{ flex: 1, paddingTop: 50 }}>
+        <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 10, textAlign: 'center' }}>
+          Liste des utilisateurs
+        </Text>
+        <UserList />
+      </View>
+    </QueryClientProvider>
+      </ScrollView>
+    </View>
+  
+);
+};
+
+const styles = StyleSheet.create ({
+    view: {
+    flex: 1,
+    backgroundColor: '#fff'
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+container: {
+    flex: 1,
+    backgroundColor: '#fff'
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+    texte: {
+    fontSize: 18,
+    marginVertical: 20,
   },
+  
+
 });
+export default accueil ;
