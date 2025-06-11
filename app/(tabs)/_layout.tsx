@@ -1,7 +1,6 @@
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { Tabs } from "expo-router";
 import React from "react";
-import { StyleSheet } from "react-native";
 
 export default function RootLayout() {
 
@@ -97,5 +96,3 @@ export default function RootLayout() {
         </>
     );
 }
-const styles = StyleSheet.create({
-});
